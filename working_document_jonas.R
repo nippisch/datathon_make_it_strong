@@ -1,16 +1,5 @@
 # exploration script Jonas
-
-# Individual und Strukturebene: Einstellungen vs. KiTa-Coverage etc.
-
-# https://eplp-dataset.org/ zu parenting leave policies
-# https://ec.europa.eu/eurostat/web/income-and-living-conditions/database Child care arrangements#
-
 library(tidyverse)
-library(survey)
-data <- read_csv(file = "cronos3_make_it_strong.csv")
-
-ggplot(data = map) +
-  geom_sf()
 
 ## Countries and regions
 table(data$cntry)
@@ -35,5 +24,9 @@ data$hincfel <- factor(data$hincfel,
                          "Refusal",
                          "Don't know",
                          "No answer"))
+
+## Analysis of satisfaction with level of education I have reached (w1sq3)
+# eduyrs, eisced, age, gndr, hincfel, hinctnta
+cor.test(x = data$w1sq3, y = data$hincfel, na.action = na.omit)
 
 
