@@ -1,10 +1,8 @@
 # exploration script Jonas
 library(tidyverse)
 library(corrplot)
-## Countries and regions
-table(data$cntry)
+library(sf)
 
-length(unique(data$region))
 
 data[data$region == "AT31", ]
 ## 146 NUTS-coded regions of different level
@@ -13,7 +11,7 @@ mean(table(data$region))
 min(table(data$region))
 max(table(data$region))
 
-
+# Maybe move to preprocessing? 
 data$hincfel <- factor(data$hincfel, 
                        levels = c(1:4, 7, 8, 9),
                        labels = c(
@@ -31,6 +29,20 @@ sum(is.na(data$w2pspwght)) # least (1705) NAs in wave 2 weights
 sum(is.na(data$w3pspwght))
 sum(is.na(data$w4pspwght))
 sum(is.na(data$w5pspwght))
+
+weights_df <- data.frame(
+  id = data$idno,
+  w1 = data$w1pspwght, 
+  w2 = data$w2pspwght, 
+  w3 = data$w3pspwght,
+  w4 = data$w4pspwght,
+  w5 = data$w5pspwght
+)
+
+weights_df$mean_w <- rowMeans(weights_df[2:6], na.rm = TRUE)
+
+View(weights_df)
+# check max diff
 
 # Observations with only NA weights?
 count <- 0
@@ -69,11 +81,15 @@ count_2
 cor_matrix <- select(data)
 
 ivs_corr <- data %>% 
-  select(, w1sq1:w3sq74) %>% 
+  select(
+    eduyrs, 
+    age, 
+    eisced, 
+    hincfel, hinctnta, 
+    everyfair, ifair, 
+    edu_satisf, edu_match) %>% 
   cor(use = "complete.obs") %>% 
   corrplot()
 
-corrplot()
 
-ivs_corr
 
