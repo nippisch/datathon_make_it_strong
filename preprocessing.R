@@ -1,7 +1,7 @@
 # preprocessing
 library(tidyverse)
 
-data <- read_csv(file = "cronos3_make_it_strong.csv")
+data <- read_csv(file = "data/cronos3_all.csv")
 
 # Selecting only relevant columns
 
@@ -19,17 +19,14 @@ data <- data |>
     "region",
     "w1pspwght",
     "w2pspwght",
-    "w3sq61",
     "w4pspwght",
-    "w4sq2",
-    "w4sq11",
     "w5pspwght",
-    "w5sq13",
-    "w5sq14",
-    "w5sq15",
-    "w5sq16",
-    "w5sq17_1",
+    "w1sq1",
+    "w1sq2",
+    "w1sq3",
+    "w3sq74"
   )
+
 
 data$gndr <- data$gndr |>
   na_if(y = 9) |>
