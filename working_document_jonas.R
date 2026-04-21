@@ -1,6 +1,6 @@
 # exploration script Jonas
 library(tidyverse)
-
+library(corrplot)
 ## Countries and regions
 table(data$cntry)
 
@@ -25,8 +25,55 @@ data$hincfel <- factor(data$hincfel,
                          "Don't know",
                          "No answer"))
 
+# Weights
+sum(is.na(data$w1pspwght))
+sum(is.na(data$w2pspwght)) # least (1705) NAs in wave 2 weights 
+sum(is.na(data$w3pspwght))
+sum(is.na(data$w4pspwght))
+sum(is.na(data$w5pspwght))
+
+# Observations with only NA weights?
+count <- 0
+for (row in 1:nrow(data)){
+  if (is.na(data$w1pspwght[row])){
+    if (is.na(data$w3pspwght[row])){
+      count <- count + 1
+    }
+  }
+}
+# 827 missings in BOTH
+
+for (row in 1:nrow(data)){
+  if (is.na(data$w1pspwght[row])){
+    if (is.na(data$w3pspwght[row])){
+      count <- count + 1
+    }
+  }
+}
+
+# 8742 NO missing AT ALL 
+count_2 <- 0
+for (row in 1:nrow(data)){
+  if (!is.na(data$w1pspwght[row])){
+    if (!is.na(data$w3pspwght[row])){
+      count_2 <- count_2 + 1
+    }
+  }
+}
+nrow(data)
+nrow(data) - count_2
+count_2
+
 ## Analysis of satisfaction with level of education I have reached (w1sq3)
 # eduyrs, eisced, age, gndr, hincfel, hinctnta
-cor.test(x = data$w1sq3, y = data$hincfel, na.action = na.omit)
+cor_matrix <- select(data)
 
+ivs_corr <- data %>% 
+  select(, w1sq1:w3sq74) %>% 
+  cor(use = "complete.obs") %>% 
+  corrplot()
+
+corrplot()
+
+ivs_corr
 

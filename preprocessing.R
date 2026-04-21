@@ -19,6 +19,7 @@ data <- data |>
     "region",
     "w1pspwght",
     "w2pspwght",
+    "w3pspwght",
     "w4pspwght",
     "w5pspwght",
     "w1sq1",
@@ -74,8 +75,6 @@ data$hinctnta <- data$hinctnta %>%
   na_if(y = 88) %>% 
   na_if(y = 99)
 
-hist(data$hinctnta)
-
 ## Items, IVs, DVs
 # Everyone has fair chance to achieve education (w1sq1)
 table(data$w1sq1, useNA = "always") # 204 "99" -> into NA
@@ -97,3 +96,13 @@ table(data$w3sq74, useNA = "always") # bunch of 6, 9 -> into NA
 data$w3sq74 <- data$w3sq74 %>% 
   na_if(y = 6) %>% 
   na_if(y = 9)
+
+# Renaming columns
+data <- data %>% 
+  rename(
+    everyfair = w1sq1,
+    ifair = w1sq2,
+    edu_satisf = w1sq3,
+    edu_match = w3sq74
+  )
+
