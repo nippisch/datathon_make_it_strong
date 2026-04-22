@@ -24,7 +24,9 @@ data <- data |>
     "w1sq1",
     "w1sq2",
     "w1sq3",
-    "w3sq74"
+    "w3sq74",
+    "w5hq5",
+    "w5hq8"
   )
 
 # Cleaning, removing NAs, factoring
@@ -59,50 +61,10 @@ data$eisced <- data$eisced %>%
   na_if(y = 88) %>% 
   na_if(y = 99)
 
-# Income
-# hincfel
-#table(data$hincfel, useNA = "always") # bunch of 7, 8, 9 -> into NA
-data$hincfel <- data$hincfel %>% 
-  na_if(y = 7) %>% 
-  na_if(y = 8) %>% 
+# Severe financial difficulties in family during first 18 years of life, how often (w5hq8)
+#table(data$w5hq5, useNA = "always")
+data$w5hq5 <- data$w5hq5 |> 
   na_if(y = 9)
-
-# hinctnta, deciles
-#table(data$hinctnta, useNA = "always") # bunch of 77, 88, 99 -> into NA
-data$hinctnta <- data$hinctnta %>% 
-  na_if(y = 77) %>% 
-  na_if(y = 88) %>% 
-  na_if(y = 99)
-
-## Items, IVs, DVs
-# Everyone has fair chance to achieve education (w1sq1)
-#table(data$w1sq1, useNA = "always") # 204 "99" -> into NA
-data$w1sq1 <- data$w1sq1 %>% 
-  na_if(y = 99)
-
-# Compared to other people, I had fair chance (w1sq2)
-#table(data$w1sq2, useNA = "always") # 275 "99" -> into NA
-data$w1sq2 <- data$w1sq2 %>% 
-  na_if(y = 99)
-
-# Satisfaction with level of education (w1sq3)
-#table(data$w1sq3, useNA = "always") # 251 "99" -> into NA
-data$w1sq3 <- data$w1sq3 %>% 
-  na_if(y = 99)
-
-# Correspondence between job and educational qualification (w3sq74)
-#table(data$w3sq74, useNA = "always") # bunch of 6, 9 -> into NA
-data$w3sq74 <- data$w3sq74 %>% 
-  na_if(y = 6) %>% 
-  na_if(y = 9)
-
-# felt save during childhood
-data$w5hq5 <- na_if(data$w5hq5, 9)
-
-# creating further variables
-data$relate <- ifelse(data$edu_match == 3, 1, ifelse(data$edu_match < 3, 0, NA))
-data$inc_diff <- ifelse(data$hincfel > 2, 1, 0)
-data$felt_safe <- ifelse(data$w5hq5 == 1, 1, 0)
 
 # Renaming columns
 data <- data %>% 
@@ -113,3 +75,9 @@ data <- data %>%
     edu_match = w3sq74
   )
 
+# creating further variables
+data$relate <- ifelse(data$edu_match == 3, yes = 1, no = ifelse(
+  data$edu_match < 3, yes = 0, no = NA)
+)
+data$inc_diff <- ifelse(data$hincfel > 2, 1, 0) # values > 2 have difficulty on present income
+data$felt_safe <- ifelse(data$w5hq5 == 1, 1, 0) # value 1 == yes, 0 == no 
