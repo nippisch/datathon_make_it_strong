@@ -1,10 +1,10 @@
 # exploration script Niklas
 library(tidyverse)
+library(survey)
 library(lme4)
 library(lmerTest)
 library(performance)
 library(see)
-library(stats)
 library(broom)
 
 data <- read.csv("data/cronos3_all.csv", sep = ",", header = TRUE)
@@ -37,7 +37,7 @@ design_w5 <- svydesign(ids = ~1, weights = ~w5pspwght, data = data_w5)
 
 data |> 
   group_by(age) |> 
-  summarise(mean_fairness = mean(w1sq2, na.rm = TRUE)) |> 
+  summarise(mean_fairness = mean(ifair, na.rm = TRUE)) |> 
   ggplot(aes(x = age, y = mean_fairness)) +
   geom_point() +
   geom_smooth()
@@ -52,9 +52,9 @@ data |>
 
 
 data |> 
-  select(cntry, age, w1sq2) |> 
+  select(cntry, age, ifair) |> 
   group_by(cntry, age) |> 
-  summarise(mean_w1sq2 = mean(w1sq2, na.rm = TRUE), .groups = "drop") |> 
+  summarise(mean_w1sq2 = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
   ggplot(aes(x = age, y = mean_w1sq2)) +
   geom_point() +
   geom_smooth() +
@@ -84,74 +84,99 @@ check_model(m1)
 model_performance(m1)
 
 data |> 
-  select(cntry, age, edu_satisf) |> 
+  select(cntry, age, ifair) |> 
   group_by(cntry, age) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = age, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = age, y = mean_ifair)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~cntry)
 
 data |> 
-  select(cntry, gndr, edu_satisf) |> 
+  select(cntry, gndr, ifair) |> 
   group_by(cntry, gndr) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = gndr, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = gndr, y = mean_ifair)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~cntry)
 
 data |> 
-  select(cntry, eduyrs, edu_satisf) |> 
+  select(cntry, eduyrs, ifair) |> 
   group_by(cntry, eduyrs) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = eduyrs, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = eduyrs, y = mean_ifair)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~cntry)
 
 data |> 
-  select(cntry, edu_match, edu_satisf) |> 
+  select(cntry, edu_match, ifair) |> 
   group_by(cntry, edu_match) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = edu_match, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = edu_match, y = mean_ifair)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~cntry)
+
+data |> 
+  select(cntry, inc_diff, ifair) |> 
+  group_by(cntry, inc_diff) |> 
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = inc_diff, y = mean_ifair)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~cntry)
 
 data |> 
   select(cntry, ifair, edu_satisf) |> 
-  group_by(cntry, ifair) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = ifair, y = mean_edu_satisf)) +
+  group_by(cntry, edu_satisf) |> 
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = edu_satisf, y = mean_ifair)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~cntry)
 
 data |> 
-  select(cntry, hincfel, edu_satisf) |> 
+  select(cntry, hincfel, ifair) |> 
   group_by(cntry, hincfel) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = hincfel, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = hincfel, y = mean_ifair)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~cntry)
 
 data |> 
-  select(cntry, w5hq5, edu_satisf) |> 
+  select(cntry, w5hq5, ifair) |> 
   group_by(cntry, w5hq5) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = w5hq5, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = w5hq5, y = mean_ifair)) +
   geom_line() +
   facet_wrap(~cntry)
 
 data |> 
-  select(cntry, w3dq53, edu_satisf) |> 
+  select(cntry, w3dq53, ifair) |> 
   group_by(cntry, w3dq53) |> 
-  summarise(mean_edu_satisf = mean(edu_satisf, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(x = w3dq53, y = mean_edu_satisf)) +
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = w3dq53, y = mean_ifair)) +
   geom_line() +
   facet_wrap(~cntry)
+
+data |> 
+  select(cntry, w4dq8, ifair) |> 
+  group_by(cntry, w4dq8) |> 
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = w4dq8, y = mean_ifair)) +
+  geom_line() +
+  facet_wrap(~cntry)
+
+data |> 
+  select(age_cat, w5hq5, ifair) |> 
+  group_by(age_cat, w5hq5) |> 
+  summarise(mean_ifair = mean(ifair, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(x = w5hq5, y = mean_ifair)) +
+  geom_line() +
+  facet_wrap(~age_cat)
 
 
 # mixed effects model
@@ -171,6 +196,8 @@ m1 <- lmer(ifair ~ age + gndr + eduyrs + relate + edu_satisf + inc_diff + felt_s
              (1 | region),
            data = data_clean_lmm,
            weights = w1pspwght)
+m1_imp <- lmerTest::step(m1)
+summary(m1)
 model_performance(m1)
 
 # new approach: seperate models
@@ -285,4 +312,49 @@ data |>
   geom_smooth() +
   facet_wrap(~ cntry)
 
+# Sankey
+data$age_cat <- ifelse(data$age < 30, 1, 
+                       ifelse(data$age < 51, 2, 
+                              ifelse(data$age > 50, 3, NA)))
+data$ifair_cat <- ifelse(data$ifair < 4, 1, 
+                         ifelse(data$ifair < 8, 2, 
+                                ifelse(data$ifair > 7, 3, NA)))
 
+## seperate models per age category
+m_young <- lmer(ifair ~ gndr + eduyrs + relate + edu_satisf + inc_diff + felt_safe + 
+             early_leave + poverty_rate + youth_unemployment + 
+             cntry + 
+             (1 | region),
+           data = data_clean_lmm[data_clean_lmm$age_cat == 1, ],
+           weights = w1pspwght)
+model_performance(m_young)
+summary(m_young)
+
+m_mid <- lmer(ifair ~ gndr + eduyrs + relate + edu_satisf + inc_diff + felt_safe + 
+             early_leave + poverty_rate + youth_unemployment + 
+             cntry + 
+             (1 | region),
+           data = data_clean_lmm[data_clean_lmm$age_cat == 2, ],
+           weights = w1pspwght)
+model_performance(m_mid)
+summary(m_mid)
+
+m_old <- lmer(ifair ~ gndr + eduyrs + relate + edu_satisf + inc_diff + felt_safe + 
+                early_leave + poverty_rate + youth_unemployment + 
+                cntry + 
+                (1 | region),
+              data = data_clean_lmm[data_clean_lmm$age_cat == 3, ],
+              weights = w1pspwght)
+model_performance(m_old)
+summary(m_old)
+
+summary(m1)
+
+data |> 
+  ggplot(aes(x = ifair)) +
+  geom_histogram(bins = 10)
+
+data |> 
+  ggplot(aes(x = ifair)) +
+  geom_histogram(bins = 10) +
+  facet_wrap(~ cntry)
