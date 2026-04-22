@@ -1,4 +1,4 @@
-# robustness analysis and further exploration
+# robustness analysis, further exploration, and diagnostics
 
 # loading relevant packages and data
 library(tidyverse)
@@ -167,3 +167,58 @@ m_old <- lmer(ifair ~ gndr + eduyrs + relate + edu_satisf + inc_diff + felt_safe
               weights = w1pspwght)
 model_performance(m_old)
 summary(m_old)
+
+# diagnostics
+## diagnostics of residuals
+resid_raw   <- resid(lmm, type = "response")
+fitted_vals <- fitted(lmm)
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+### residuals vs. fitted
+plot(fitted_vals, resid_raw,
+     xlab = "fitted", ylab = "residuals",
+     main = "residuals vs. fitted",
+     pch = 16, col = adjustcolor("blue", 0.4), cex = 0.7)
+abline(h = 0, col = "red", lwd = 2, lty = 2)
+lines(lowess(fitted_vals, resid_raw), col = "red", lwd = 2)
+
+### qq-plot residuals
+qqnorm(resid_raw, main = "qq-plot residuals",
+       pch = 16, col = adjustcolor("blue", 0.4), cex = 0.7)
+qqline(resid_raw, col = "red", lwd = 2)
+
+### scale-location
+plot(fitted_vals, sqrt(abs(resid_raw)),
+     xlab = "fitted", ylab = "square-root residuals",
+     main = "scale-location",
+     pch = 16, col = adjustcolor("blue", 0.4), cex = 0.7)
+lines(lowess(fitted_vals, sqrt(abs(resid_raw))), col = "red", lwd = 2)
+
+### histogram residuals
+hist(resid_raw, breaks = 40, col = "blue", border = "white",
+     main = "histogram residuals", xlab = "residuals")
+curve(dnorm(x, mean(resid_raw), sd(resid_raw)) * length(resid_raw) *
+        diff(hist(resid_raw, plot = FALSE, breaks = 40)$breaks[1:2]),
+      add = TRUE, col = "red", lwd = 2)
+
+par(mfrow = c(1, 1))
+
+## random effects
+re <- ranef(lmm)$region[, 1]
+
+par(mfrow = c(1, 2))
+
+qqnorm(re, main = "qq-plot random effects",
+       pch = 16, col = "blue")
+qqline(re, col = "red", lwd = 2)
+
+hist(re, breaks = 20, col = "blue", border = "white",
+     main = "histogram random effects", xlab = "BLUPs")
+curve(dnorm(x, mean(re), sd(re)) * length(re) *
+        diff(hist(re, plot = FALSE, breaks = 20)$breaks[1:2]),
+      add = TRUE, col = "red", lwd = 2)
+
+par(mfrow = c(1, 1))
+
+shapiro.test(re)
