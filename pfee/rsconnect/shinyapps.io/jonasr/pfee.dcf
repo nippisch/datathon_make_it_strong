@@ -1,0 +1,10 @@
+name: pfee
+title:
+username: jonasr
+account: jonasr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17201684
+bundleId: 11890310
+url: https://jonasr.shinyapps.io/pfee/
+version: 1

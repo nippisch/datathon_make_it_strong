@@ -1,6 +1,6 @@
 library(shiny)
 library(tidyverse)
-library(sf)
+library(sp)
 library(leaflet)
 
 # ── Data ──────────────────────────────────────────────────────────────────────
@@ -22,46 +22,11 @@ data <- data %>% # construct percentage values
                   age < 55        ~ "35–54",
                   !is.na(age)     ~ "55+"),
                   levels = c("< 25", "25–34", "35–54", "55+")),
-    inc_group = factor(case_when(
-                  hinctnta <= 3   ~ "Low (1–3)",
-                  hinctnta <= 7   ~ "Mid (4–7)",
-                  !is.na(hinctnta)~ "High (8–10)"),
-                  levels = c("Low (1–3)", "Mid (4–7)", "High (8–10)"))
   )
 
-# ── Shapefiles (cached) ───────────────────────────────────────────────────────
-if (!file.exists("data/map_regions_v3.rds") || !file.exists("data/map_countries_v3.rds")) {
-  message("Preparing shapefiles...")
-
-  map_eu <- st_read("data/NUTS_RG_20M_2021_3035.shp/", quiet = TRUE) %>%
-    filter(LEVL_CODE == 2,
-           !NUTS_ID %in% c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5")) %>%
-    rename(region = NUTS_ID) %>%
-    select(region, CNTR_CODE, geometry) %>%
-    st_transform(4326) %>%
-    st_simplify(preserveTopology = TRUE, dTolerance = 1000)
-
-  map_uk <- st_read("data/ITL2_JAN_2025_UK_BFE_8224540410987116282/", quiet = TRUE) %>%
-    st_transform(4326) %>%
-    st_simplify(preserveTopology = TRUE, dTolerance = 1000) %>%
-    mutate(nuts1 = substr(str_replace(ITL225CD, "^TL", "UK"), 1, 3)) %>%
-    group_by(region = nuts1) %>%
-    summarise(geometry = st_union(geometry), .groups = "drop") %>%
-    mutate(CNTR_CODE = "GB")
-
-  map_regions <- bind_rows(map_eu, map_uk) %>%
-    filter(CNTR_CODE %in% unique(data$cntry))
-
-  map_countries <- map_regions %>%
-    group_by(CNTR_CODE) %>%
-    summarise(geometry = st_union(geometry), .groups = "drop")
-
-  saveRDS(map_regions,   "data/map_regions_v3.rds")
-  saveRDS(map_countries, "data/map_countries_v3.rds")
-} else {
-  map_regions   <- readRDS("data/map_regions_v3.rds")
-  map_countries <- readRDS("data/map_countries_v3.rds")
-}
+# ── Shapefiles ────────────────────────────────────────────────────────────────
+map_regions_sp   <- readRDS("data/map_regions_sp.rds")
+map_countries_sp <- readRDS("data/map_countries_sp.rds")
 
 # ── Lookups ───────────────────────────────────────────────────────────────────
 
@@ -99,7 +64,7 @@ map_var_choices <- c(
   "Felt safe during childhood (%)"              = "felt_safe"
 )
 
-# Educational outcomes (Tab 2)
+# Educational outcomes (Tab 2 comparisons)
 outcome_choices <- c(
   "Everyone has fair educational chance" = "everyfair",
   "I had a fair educational chance"      = "ifair",
@@ -155,8 +120,6 @@ ui <- navbarPage(
     #info_box { background: #f9f0ef; border-left: 3px solid #ad1400;
                 border-radius: 4px; padding: 12px;
                 min-height: 60px; font-size: 13px; white-space: pre-line; }
-
-    .violin-hint { color: #888; font-size: 12px; font-style: italic; margin-top: 4px; }
 
     /* ── Map legend ── */
     .info.legend { max-width: 140px; font-size: 11px; }
@@ -234,19 +197,10 @@ ui <- navbarPage(
 # ── Server ────────────────────────────────────────────────────────────────────
 server <- function(input, output, session) {
 
-  # Tracks the between-country selection reliably on the server side
-  comp_selection <- reactiveVal(character(0))
-
   # Reset button clears the between-country selection
   observeEvent(input$reset_countries, {
-    comp_selection(character(0))
     updateSelectInput(session, "comp_countries", selected = character(0))
   })
-
-  # Sync reactiveVal when the user manually changes the selectInput
-  observeEvent(input$comp_countries, {
-    comp_selection(input$comp_countries %||% character(0))
-  }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
   # ── Tab 1: Map ──────────────────────────────────────────────────────────────
 
@@ -268,12 +222,14 @@ server <- function(input, output, session) {
   })
   # 
   map_sf <- reactive({
-    base <- if (input$level == "country") {
-      map_countries %>% rename(id = CNTR_CODE)
+    if (input$level == "country") {
+      sp_obj <- map_countries_sp
+      sp_obj@data <- left_join(rename(sp_obj@data, id = CNTR_CODE), agg(), by = "id")
     } else {
-      map_regions %>% rename(id = region)
+      sp_obj <- map_regions_sp
+      sp_obj@data <- left_join(rename(sp_obj@data, id = region), agg(), by = "id")
     }
-    left_join(base, agg(), by = "id")
+    sp_obj
   })
 
   pal <- reactive({
@@ -304,7 +260,7 @@ server <- function(input, output, session) {
       addLegend(pal = p, values = ~value, title = lbl,
                 position = "bottomright", na.label = "No data", opacity = 0.85)
   })
-
+  # Clicking on countries to get more info
   output$click_info <- renderUI({
     click <- input$map_shape_click
     if (is.null(click)) return(HTML("Click on a region for details."))
@@ -321,18 +277,6 @@ server <- function(input, output, session) {
   })
 
   # ── Tab 2: Comparisons ──────────────────────────────────────────────────────
-
-  # Map click toggles country in/out of between-country comparison
-  observeEvent(input$map_shape_click, ignoreInit = TRUE, {
-    click    <- input$map_shape_click
-    cntry_id <- if (input$level == "country") click$id else substr(click$id, 1, 2)
-    if (!cntry_id %in% cntry_codes) return()
-    current <- comp_selection()
-    updated <- if (cntry_id %in% current) setdiff(current, cntry_id) else c(current, cntry_id)
-    comp_selection(updated)
-    updateSelectInput(session, "comp_countries", selected = updated)
-  })
-
   output$comp_plot <- renderPlot({
     req(input$comp_outcome)
     outcome <- input$comp_outcome
@@ -380,14 +324,12 @@ server <- function(input, output, session) {
                                           hjust = 0, margin = margin(t = 8)))
 
     } else {
-      sel <- comp_selection()
+      sel <- input$comp_countries
       req(length(sel) > 0)
-
-      lvls <- unname(na.omit(country_names[sel]))
 
       plot_data <- data %>%
         filter(cntry %in% sel, !is.na(w1pspwght)) %>%
-        mutate(country = factor(unname(country_names[cntry]), levels = lvls),
+        mutate(country = unname(country_names[cntry]),
                value   = .data[[outcome]],
                weight  = w1pspwght) %>%
         filter(!is.na(value), !is.na(country))
