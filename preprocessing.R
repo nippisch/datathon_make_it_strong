@@ -26,6 +26,7 @@ data <- data |>
     "w1sq3",
     "w3sq74",
     "w5hq5",
+    "w5hq7",
     "w5hq8"
   )
 
@@ -61,10 +62,52 @@ data$eisced <- data$eisced %>%
   na_if(y = 88) %>% 
   na_if(y = 99)
 
+# matching edu and job
+data$w3sq74 <- data$w3sq74 |> 
+  na_if(y = 6) |> 
+  na_if(y = 9)
+
+# income, feeling
+data$hincfel <- data$hincfel |> 
+  na_if(y = 7) |> 
+  na_if(y = 8) |> 
+  na_if(y = 9)
+
+# income, deciles
+data$hinctnta <- data$hinctnta |> 
+  na_if(y = 77) |> 
+  na_if(y = 88) |> 
+  na_if(y = 99) 
+
+# Everyone in country fair chance achieve level of education they seek (w1sq1)
+#table(data$w1sq1, useNA = "always")
+data$w1sq1 <- data$w1sq1 |> 
+  na_if(y = 99)
+
+# Compared other people in country, fair chance achieve level of education I seek (w1sq2)
+#table(data$w1sq2, useNA = "always")
+data$w1sq2 <- data$w1sq2 |> 
+  na_if(y = 99)
+
+# Satisfaction with level of education you have reached (w1sq3)
+#table(data$w1sq3, useNA = "always")
+data$w1sq3 <- data$w1sq3 |> 
+  na_if(y = 99)
+
+
 # Severe financial difficulties in family during first 18 years of life, how often (w5hq8)
 #table(data$w5hq5, useNA = "always")
+#table(data$w5hq5)
 data$w5hq5 <- data$w5hq5 |> 
   na_if(y = 9)
+
+# w5hq7
+data$w5hq7 <- na_if(data$w5hq7, 9)
+data$conflicts <- ifelse(data$w5hq7 < 4, 1, 0)
+
+# w5hq8
+data$w5hq8 <- na_if(data$w5hq8, 9)
+data$financial_diffs <- ifelse(data$w5hq8 < 4, 1, 0)
 
 # Renaming columns
 data <- data %>% 
@@ -79,5 +122,9 @@ data <- data %>%
 data$relate <- ifelse(data$edu_match == 3, yes = 1, no = ifelse(
   data$edu_match < 3, yes = 0, no = NA)
 )
+
 data$inc_diff <- ifelse(data$hincfel > 2, 1, 0) # values > 2 have difficulty on present income
 data$felt_safe <- ifelse(data$w5hq5 == 1, 1, 0) # value 1 == yes, 0 == no 
+
+
+# save(data, file = "data/data_processed.RData")
