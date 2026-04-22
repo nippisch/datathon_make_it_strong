@@ -1,4 +1,4 @@
-# exploration script Jonas
+# exploration script Jonas (script was just for personal use and is not intendent to work on it's own)
 library(tidyverse)
 library(corrplot)
 library(sf)
