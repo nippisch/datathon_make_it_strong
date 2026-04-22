@@ -97,6 +97,14 @@ data$w3sq74 <- data$w3sq74 %>%
   na_if(y = 6) %>% 
   na_if(y = 9)
 
+# felt save during childhood
+data$w5hq5 <- na_if(data$w5hq5, 9)
+
+# creating further variables
+data$relate <- ifelse(data$edu_match == 3, 1, ifelse(data$edu_match < 3, 0, NA))
+data$inc_diff <- ifelse(data$hincfel > 2, 1, 0)
+data$felt_safe <- ifelse(data$w5hq5 == 1, 1, 0)
+
 # Renaming columns
 data <- data %>% 
   rename(
