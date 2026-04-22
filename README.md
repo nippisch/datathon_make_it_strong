@@ -12,6 +12,8 @@ We draw our conclusions on different data sources, including:
 - Cronos-3 (Wave 5; ESS ERIC, 2025c)
 - Eurostat data sets on the at-risk-poverty-rate (Eurostat, 2026a), early leavers from education (Eurostat, 2026b), and young NEET rate (Eurostat, 2026c).
 
+We also developed an interactive map for the descriptive analysis of our variables of interest: https://jonasr.shinyapps.io/pfee/
+
 To investigate the question, to what extent people's perceived chances of attaining the education they wanted depends on their own background and on structural aspects of their region, we apply a Linear Mixed Model on three levels:
 - Country level (fixed effects)
 - Regional level (NUTS-2; random effects)
