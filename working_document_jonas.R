@@ -91,5 +91,19 @@ ivs_corr <- data %>%
   cor(use = "complete.obs") %>% 
   corrplot()
 
+# 
+summary(data$edu_satisf)
+cor(data$edu_satisf, data$edu_match, use = "complete.obs")
+cor(data$ifair, data$edu_satisf, use = "complete.obs")
+cor(data$ifair, data$everyfair, use = "complete.obs")
+cor(data$everyfair, data$edu_satisf, use = "complete.obs")
+
+# Education level and income decile / feeling
+cor(data$hinctnta, data$eisced, "complete.obs")
+cor(data$hincfel, data$eisced, "complete.obs")
+
+# 
 
 
+
+ml <- lm(formula = "")
