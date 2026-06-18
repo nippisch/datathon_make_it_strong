@@ -60,6 +60,7 @@ ggplot() +
     aes(x = ifair, y = cntry, color = group, shape = group),
     size = 3
   ) +
+  geom_vline(xintercept = mean(data$ifair, na.rm = TRUE), linetype = "dashed") +
   scale_color_manual(values = c("Total" = "black", "Male" = "#2196F3", "Female" = "#E91E63")) +
   scale_shape_manual(values = c("Total" = 18, "Male" = 16, "Female" = 16)) +
   scale_x_continuous(limits = c(5, 8.5)) +
@@ -68,19 +69,18 @@ ggplot() +
     y = NULL,
     color = NULL, shape = NULL,
  ) +
-  theme_linedraw(base_family = "Luminari") +
+  theme_linedraw() +
   theme(
-    panel.background = element_rect(fill = "white", colour = "white"),
-    plot.background = element_rect(fill = "#FFF7F5", colour = "#FFF7F5"),
+    panel.background = element_rect(fill = 'transparent', colour = 'NA'),
+    plot.background = element_rect(fill = "transparent", colour = "NA"),
     plot.title = element_text(size = 20, face = "bold", colour = "#22444b"),
-    axis.text.x = element_text(colour="#22444b", size = 10, family = "Luminari"),
-    axis.title.x = element_text(colour = "#22444b", size = 10, family = "Luminari"),
-    axis.text.y = element_text(colour="#22444b", size = 10, family = "Luminari"),
-    legend.text = element_text(colour="#22444b", size = 10, family = "Luminari"),
+    axis.text.x = element_text(colour="#22444b", size = 14),
+    axis.title.x = element_text(colour = "#22444b", size = 16),
+    axis.text.y = element_text(colour="#22444b", size = 16),
+    legend.text = element_text(colour="#22444b", size = 16),
     legend.position = "top",
-    legend.background = element_rect(fill = "#FFF7F5"),
-    legend.key = element_rect(fill = "#FFF7F5"),
+    legend.background = element_rect(fill = "transparent", colour = "NA")
   )
 
 # 10cm height * 16cm width on poster
-# ggsave(filename = "dotplot_xzoomed.png", width = 16, height = 10, units = "cm")
+ggsave(filename = "dotplot_xzoomed_1.png", width = 40, height = 20, units = "cm")

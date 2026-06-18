@@ -19,7 +19,7 @@ data_clean_lmm <- data_all |>
   filter(!is.na(w1pspwght))
 
 # fitting the LMM and assessing the quality
-lmm <- lmer(ifair ~ age + gndr + eduyrs + relate + edu_satisf + inc_diff + felt_safe + financial_diffs + conflicts +
+lmm <- lmer(ifair ~ 0 +age + gndr + eduyrs + relate + edu_satisf + inc_diff + felt_safe + financial_diffs + conflicts +
              early_leave + poverty_rate + youth_unemployment + 
              cntry + 
              (1 | region),
@@ -58,26 +58,34 @@ dat_graph <- dat_res %>%
     sig  = ifelse(p < 0.05, 1L, 0L))
 
 # selecting all coefficients but Intercept and countries
-dat_graph <- dat_graph[2:13, ]
+dat_graph <- dat_graph[2:nrow(dat_res), ]
 
 # creating the graph
 dat_graph |> 
   mutate(term = forcats::fct_reorder(term, beta, .desc = FALSE)) |> 
   ggplot(aes(x = beta, y = term)) +
-  geom_point(position = position_dodge(width = 0.5), size = 3, colour = "#AB110F") +
+  geom_point(position = position_dodge(width = 0.5), size = 4, colour = "#00457D") +
   geom_errorbarh(aes(
     xmin = beta - 1.96 * sd,
     xmax = beta + 1.96 * sd), 
-    colour = "#AB110F", height = 0.3, size = 1) +
+    colour = "#00457D", height = 0.4, size = 2) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   labs(
     x = "",
     y = "",
     title = "") +
-  scale_x_continuous(limits = c(-1, 1),
-                     breaks = seq(-1, 1, by = 0.2),
+  scale_x_continuous(limits = c(-2.5, 2.5),
+                     breaks = seq(-2.5, 2.5, by = 0.5),
                      expand = c(0,0.1)) +
   scale_y_discrete(labels = c(
+    "cntryHU" = "Hungary",
+    "cntryFI" = "Finland",
+    "cntryCZ" = "Czechia",
+    "cntryBE" = "Belgium", 
+    "cntrySI" = "Slovenia",
+    "cntryFR" = "France",
+    "cntryPL" = "Poland",
+    "cntryPT" = "Portugal",
     "age" = "Age (in years)",
     "gndrFemale" = "Female (1: Yes)",
     "eduyrs" = "Education (in years)",
@@ -92,8 +100,10 @@ dat_graph |>
     "youth_unemployment" = "Young NEETs (in %)")) +
   theme_linedraw() +
   theme(
-    panel.background = element_rect(fill = 'white', colour = 'white'),
-    plot.background = element_rect(fill = '#FFF7F5', colour = '#FFF7F5'),
+    panel.background = element_rect(fill = 'transparent', colour = 'NA'),
+    plot.background = element_rect(fill = "transparent", colour = "NA"),
     axis.text.x = element_text(colour="#22444b", size = 10),
-    axis.text.y = element_text(colour="#22444b", size = 14),
+    axis.text.y = element_text(colour="#22444b", size = 16),
     legend.position = "none")
+
+ggsave(filename = "coefficients_1.png", width = 40, height = 40, units = "cm")
